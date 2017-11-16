@@ -1,0 +1,85 @@
+\documentclass[11pt]{article}
+
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+% more advanced mathematical symbols
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{enumerate}
+
+\begin{document}
+
+\title{\textbf{Security Assignment}}
+\date{for 4th December 2017}
+\author{Bradley J. Mackey}
+\maketitle
+
+\section{Vulnerability}
+
+Path traversal vulnerability on the FileServer (running on port 8080).
+
+\subsection{Exploit}
+
+A malicious user is able to access any file on the entire server (including files not owned by \texttt{user} from \texttt{root} and the \texttt{backup} user) by traversing up and down to any file, by using url encoding in the link.
+
+\subsection{Mitigation}
+
+Improved \textbf{url input sanitation} on the FileServer would prevent url encoding that allows such traversal. This could be achieved by only allowing alpha-numeric characters to be entered in a url, followed by a dot and then a short file extension. If the url is detected not to match this pattern, the request can be rejected.
+
+\section{Vulnerability}
+
+SQL injection vulnerability on `shop' web server (running on port 80).
+
+\subsection{Exploit}
+
+When a user signs up or logs in to the shop system, a maliciously crafted username or password can execute arbitrary SQL queries on the database (e.g. \texttt{';DROP DATABASE shop;}). 
+
+\subsection{Mitigation}
+
+Improved input sanitation, by \textbf{escaping} user input using \texttt{real\_escape\_string} in PHP will prevent user data being interpreted as SQL commands.
+
+\section{Vulnerability}
+
+XSS vulnerability on `shop' web server (running on port 80).
+
+\subsection{Exploit}
+
+If a user enters a JavaScript snippet for a username (or password) when signing up, the browser interprets this as code rather than data, meaning arbitrary code could execute in the browser of anyone that views this user's username. This could, for example, perform a malicious act such as cookie theft on another client's computer.
+
+\subsection{Mitigation}
+
+Similarly to the SQL injection vulnerability, this can be mitigated by \textbf{improved input sanitisation}, such as only allowing a short alpha-numeric username and only allowing certain characters within the password and using \texttt{real\_escape\_string} on the PHP server to prevent the data being interpreted as code.
+
+\section{Vulnerability}
+
+User permissions. User accounts on the system (such as \texttt{user}) have permission to view other user's home directories, as well as root directories.
+
+\subsection{Exploit}
+
+Any user on the system has permission to navigate to any directory of any other user on the system without barriers. This includes root directories and files such as \texttt{/var/www/html/} containing \texttt{register.php}, which happens to be a file that contains the username and password for \texttt{root} (password \texttt{letmein}) (I won't mention the terrible password$\:^{(oops)}$) in plaintext, used for connecting to the \texttt{shop} database.
+
+\subsection{Mitigation}
+
+A \textbf{increased level of security} for individual user's home directories (i.e. users' should only be able to view their own directory) and allowing only the \texttt{root} user to have access to root files.
+
+\section{Vulnerability}
+
+Passwords stored in plaintext in SQL server for `shop'.
+
+\subsection{Exploit}
+
+If a malicious user (including a malicious administrator) gained access to the database, they are able to view a list of usernames and passwords for the shop in plaintext, inside the \texttt{users} table in the \texttt{shop} database. This would mean they could impersonate any user in the database and spend their credits.
+
+\subsection{Mitigation}
+
+Instead of storing plaintext passwords in the database, storing a \textbf{salted hash} for each user's password would mean that even if the database was compromised, user's accounts will not be. This is because the salted hash is only used to \textit{check} if a user's password is correct by using a one-way hash function. The additional layer of salt (that should be a randomised string for each user) will ensure that even if 2 user's passwords are the same, they will not have the same hash and also means using a password cracking tool such as a rainbow table is much less feasible due to the additional layer of randomness. Of course, user's should also use a strong password as well (which it appears the current user's of the shop do not have).
+
+\section{Vulnerability}
+
+\subsection{Exploit}
+
+\subsection{Mitigation}
+
+\end{document}
