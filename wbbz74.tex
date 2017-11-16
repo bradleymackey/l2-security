@@ -38,7 +38,7 @@ When a user signs up or logs in to the shop system, a maliciously crafted userna
 
 \subsection{Mitigation}
 
-Improved input sanitation, by \textbf{escaping} user input using \texttt{real\_escape\_string} in PHP will prevent user data being interpreted as SQL commands.
+Improved input sanitation, by \textbf{escaping} user input using \texttt{real\_escape\_string} in PHP will prevent user data being interpreted as SQL commands. Stricter input validation could also be applied to the username and password fields, such as only allowing alpha-numeric characters.
 
 \section{Vulnerability}
 
@@ -70,13 +70,17 @@ Passwords stored in plaintext in SQL server for `shop'.
 
 \subsection{Exploit}
 
-If a malicious user (including a malicious database administrator) gained access to the database, they are able to view a list of usernames and passwords for the shop in plaintext, inside the \texttt{users} table in the \texttt{shop} database. This would mean they could impersonate any user in the database and spend their credits.
+If a malicious user (including a malicious database administrator) gained access to the database, they are able to view a list of usernames and passwords for the shop in plaintext, inside the \texttt{users} table in the \texttt{shop} database. This would mean they could impersonate any user in the database and spend their credits. As user's typically use the same password across numerous websites, this could also be used to hack into other accounts owned by that user.
 
 \subsection{Mitigation}
 
 Instead of storing plaintext passwords in the database, storing a \textbf{salted hash} for each user's password would mean that even if the database was compromised, user's accounts will not be. This is because the salted hash is only used to \textit{check} if a user's password is correct by using a one-way hash function. The additional layer of salt (that should be a randomised string for each user) will ensure that even if 2 user's passwords are the same, they will not have the same hash and also means using password cracking facilities such as rainbow tables are much less feasible due to this additional layer of randomness. Of course, user's should also use a strong password (which it appears the current user's of the shop do not have) in order to avoid having their password easily brute-forced or dictionary brute-forced.
 
 \section{Vulnerability}
+
+mysqldump requires root permission for some reason, investigate
+
+this might not really be a vulnerability though, idk....
 
 \subsection{Exploit}
 
