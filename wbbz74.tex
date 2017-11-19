@@ -18,11 +18,11 @@
 
 \section{Vulnerability}
 
-Path traversal vulnerability on the FileServer (running on port 8080).
+Path traversal vulnerability on the FileServer [\texttt{http://localhost:8080}].
 
 \subsection{Exploit}
 
-A malicious user is able to access any file on the entire server (including files not owned by \texttt{user} from \texttt{root} and the \texttt{backup} user) by traversing up and down to any file, by using url encoding in the link.
+A malicious user is able to access any file on the entire server (including files not owned by \texttt{user} - from \texttt{root} and the \texttt{backup} user) by traversing up and down to any file, by using url encoding in the link.
 
 \subsection{Mitigation}
 
@@ -30,19 +30,21 @@ Improved \textbf{url input sanitation} on the FileServer would prevent url encod
 
 \section{Vulnerability}
 
-SQL injection vulnerability on `shop' web server (running on port 80).
+SQL injection vulnerability on `shop' web server [\texttt{http://localhost:80}].
 
 \subsection{Exploit}
 
-When a user signs up or logs in to the shop system, a maliciously crafted username or password can execute arbitrary SQL queries on the database (e.g. \texttt{';DROP DATABASE shop;}). 
+From the `login' page of the shop system, a maliciously crafted username can allow access to other user accounts on the database without a password (e.g. when username is ``\texttt{' OR 1=1 -- }" [\textbf{no password}], the system allows the login, and allows us to view the credits of the first user's credits returned by the SQL query (which in the case of the demo data is \texttt{sally})). This happens because this modifies the query to return all users in the database, because `\texttt{1=1}' always evaluates to \texttt{true} and `\texttt{-- }' comments out the remainder of the query, then the first resulting row is returned.
 
 \subsection{Mitigation}
 
-Improved input sanitation, by \textbf{escaping} user input using \texttt{real\_escape\_string} in PHP will prevent user data being interpreted as SQL commands. Stricter input validation could also be applied to the username and password fields, such as only allowing alpha-numeric characters.
+Improved input sanitation, by \textbf{escaping} user input, which will prevent user data being interpreted as SQL commands. Stricter input validation could also be applied to the username and password fields, such as only allowing alpha-numeric characters.
+
+In addition, the PHP script used to handle login could be modified to ensure that only \textbf{one result is returned}, otherwise display an error. It could also \textbf{double check} that the result returned matches the username and password that the user has entered.
 
 \section{Vulnerability}
 
-XSS vulnerability on `shop' web server (running on port 80).
+XSS vulnerability on `shop' web server [\texttt{http://localhost:80}].
 
 \subsection{Exploit}
 
@@ -50,23 +52,23 @@ If a user enters a JavaScript snippet for a username (or password) when signing 
 
 \subsection{Mitigation}
 
-Similarly to the SQL injection vulnerability, this can be mitigated by \textbf{improved input sanitisation}, such as only allowing a short alpha-numeric username and only allowing certain characters within the password and using \texttt{real\_escape\_string} on the PHP server to prevent the data being interpreted as code.
+This can be mitigated by \textbf{improved input sanitisation}, such as only allowing a short alpha-numeric username and only allowing certain characters within the password. \textbf{Escaping} user input will also prevent the user data being interpreted as code.
 
 \section{Vulnerability}
 
-User permissions. User accounts on the system (such as \texttt{user}) have permission to view other user's home directories, including \texttt{/root}.
+\texttt{user} is given unnecessary \texttt{root} privilege.
 
 \subsection{Exploit}
 
-Any user on the system has permission to navigate to any directory of any other user on the system without barriers. This includes root directories and files such as \texttt{/var/www/html/} containing \texttt{register.php}, which happens to be a file that contains the username and password for \texttt{root} (password \texttt{letmein}) (I won't mention the terrible password$\:^{(oops)}$) in plaintext, used for connecting to the \texttt{shop} database.
+In order to backup the \texttt{shop} database to the \texttt{backup} account using the \texttt{mysqldump} and the FileServer, \texttt{user} is granted \texttt{root} privilege in order to have access to the database. This is not necessary because of the fact that \texttt{user} already has full permission to read, write and \texttt{mysqldump} the database  without this \texttt{root} permission. With these heightened permissions (and the \texttt{root} password located in \texttt{user/outputDB.c}), an attacker would have \texttt{root} control over the computer even if they were \textit{only} able to access \texttt{user/} (via the FileServer or just logging in as \texttt{user}). In addition, \texttt{user} could unintentionally perform damage to the system (if they were to run an incorrect command) without challenge, because the level of privilege for \texttt{user} is too high.
 
 \subsection{Mitigation}
 
-A \textbf{increased level of security} for individual user's home directories, i.e. users' should only be able to read/read-write their own directory. This will have an additional dampening effect on vulnerability \#1, as path traversals \textit{couldn't} access other user's files.
+The reason \texttt{user} thinks they require \texttt{root} permission is because in the \texttt{mysqldump} command in \texttt{user/outputDB.c}, they supply the \texttt{root} password as a parameter (\texttt{letmein}), also exposing this unnecessarily. If \texttt{user} tried to run this command without passing the \texttt{root} password in, the command would work without this escalated privilege.
 
 \section{Vulnerability}
 
-Passwords stored in plaintext in SQL server for `shop'.
+Passwords stored in plaintext in SQL database for `shop'.
 
 \subsection{Exploit}
 
@@ -74,16 +76,20 @@ If a malicious user (including a malicious database administrator) gained access
 
 \subsection{Mitigation}
 
-Instead of storing plaintext passwords in the database, storing a \textbf{salted hash} for each user's password would mean that even if the database was compromised, user's accounts will not be. This is because the salted hash is only used to \textit{check} if a user's password is correct by using a one-way hash function. The additional layer of salt (that should be a randomised string for each user) will ensure that even if 2 user's passwords are the same, they will not have the same hash and also means using password cracking facilities such as rainbow tables are much less feasible due to this additional layer of randomness. Of course, user's should also use a strong password (which it appears the current user's of the shop do not have) in order to avoid having their password easily brute-forced or dictionary brute-forced.
+Instead of storing plaintext passwords in the database, storing a \textbf{salted hash} for each user's password would mean that even if the database was compromised, user's accounts will not be. This is because the salted hash is only used to \textit{check} if a user's password is correct by using a one-way hash function. The additional layer of salt (that should be a randomised string for each user) will ensure that even if 2 user's passwords are the same, they will not have the same hash and also means using password cracking facilities such as rainbow tables are much less feasible due to this additional layer of randomness.
+
+Of course, users' should also use a strong password (which it appears the current users' of the shop do not have) in order to avoid having their password easily brute-forced or dictionary brute-forced. This could be made mandatory when a user signs up for an account.
 
 \section{Vulnerability}
 
-mysqldump requires root permission for some reason, investigate
-
-this might not really be a vulnerability though, idk....
+Source code placed alongside complied code throughout box (by \texttt{user}'s own admission, \texttt{user/README.txt}).
 
 \subsection{Exploit}
 
+Placing source code alongside compiled could allow an attacker to easily reverse engineer any the systems on the box, for example the FileServer. This is because if they gain access to the system, they would also see this source code to see how a given service on the box works (they could even use the FileServer in this case to read these source files). It is then trivial for an attacker to reverse engineer and exploit this service.
+
 \subsection{Mitigation}
+
+Always keep all source code away from production servers, so that the chance of an attacker getting hold of it is nil (at least make reverse engineering \textit{a little} hard for them).
 
 \end{document}
