@@ -34,13 +34,13 @@ SQL injection vulnerability on `shop' web server [\texttt{http://localhost:80}].
 
 \subsection{Exploit}
 
-From the `login' page of the shop system, a maliciously crafted username can allow access to other user accounts on the database without a password (e.g. when username is ``\texttt{' OR 1=1 -- }" [\textbf{no password}], the system allows the login, and allows us to view the credits of the first user's credits returned by the SQL query (which in the case of the demo data is \texttt{sally})). This happens because this modifies the query to return all users in the database, because `\texttt{1=1}' always evaluates to \texttt{true} and `\texttt{-- }' comments out the remainder of the query, then the first resulting row is returned.
+From the `login' page of the shop system, a maliciously crafted username can allow access to other user accounts on the database without a password (e.g. when username is ``\texttt{' OR 1=1 -- }" [\textbf{no password}], the system allows the login, and allows us to view the credits of some user, which in the case of the demo data is \texttt{sally}). This happens because the malicious username modifies the query to return all users in the database (as `\texttt{1=1}' always evaluates to \texttt{true} and `\texttt{-- }' comments out the remainder of the query), then the first row of the query is selected by the PHP script and we can see that user's credits.
 
 \subsection{Mitigation}
 
-Improved input sanitation, by \textbf{escaping} user input, which will prevent user data being interpreted as SQL commands. Stricter input validation could also be applied to the username and password fields, such as only allowing alpha-numeric characters.
+Improved input sanitation, by \textbf{escaping} user input, which will prevent user data being interpreted as an SQL query. Stricter input validation could also be applied to the username and password fields, such as only allowing alpha-numeric characters (and maybe \textit{some} symbols).
 
-In addition, the PHP script used to handle login could be modified to ensure that only \textbf{one result is returned}, otherwise display an error. It could also \textbf{double check} that the result returned matches the username and password that the user has entered.
+In addition, the PHP script used to handle login could be modified to ensure that only \textbf{one result is returned}, otherwise display an error. It could also \textbf{double check} that the query result matches the username and password that the user has entered.
 
 \section{Vulnerability}
 
@@ -60,7 +60,7 @@ This can be mitigated by \textbf{improved input sanitisation}, such as only allo
 
 \subsection{Exploit}
 
-In order to backup the \texttt{shop} database to the \texttt{backup} account using the \texttt{mysqldump} and the FileServer, \texttt{user} is granted \texttt{root} privilege in order to have access to the database. This is not necessary because of the fact that \texttt{user} already has full permission to read, write and \texttt{mysqldump} the database  without this \texttt{root} permission. With these heightened permissions (and the \texttt{root} password located in \texttt{user/outputDB.c}), an attacker would have \texttt{root} control over the computer even if they were \textit{only} able to access \texttt{user/} (via the FileServer or just logging in as \texttt{user}). In addition, \texttt{user} could unintentionally perform damage to the system (if they were to run an incorrect command) without challenge, because the level of privilege for \texttt{user} is too high.
+In order to backup the \texttt{shop} database to the \texttt{backup} account using the \texttt{mysqldump} and the FileServer, \texttt{user} is granted \texttt{root} privilege in order to have access to the database. This is not necessary because of the fact that \texttt{user} already has full permission to read, write and `\texttt{mysqldump}' the database  without this \texttt{root} permission. With these heightened permissions (and the \texttt{root} password located in \texttt{user/outputDB.c}), an attacker would have \texttt{root} control over the computer even if they were \textit{only} able to access \texttt{user/} (via the FileServer or just logging in as \texttt{user}). In addition, \texttt{user} could unintentionally perform damage to the system (if they were to run an incorrect command) without challenge, because the level of privilege for \texttt{user} is too high.
 
 \subsection{Mitigation}
 
@@ -72,13 +72,13 @@ Passwords stored in plaintext in SQL database for `shop'.
 
 \subsection{Exploit}
 
-If a malicious user (including a malicious database administrator) gained access to the database, they are able to view a list of usernames and passwords for the shop in plaintext, inside the \texttt{users} table in the \texttt{shop} database. This would mean they could impersonate any user in the database and spend their credits. As user's typically use the same password across numerous websites, this could also be used to hack into other accounts owned by that user.
+If a malicious user (including a malicious database administrator) gained access to the database, they are able to view a list of usernames and passwords for the shop in plaintext, inside the \texttt{users} table in the \texttt{shop} database. This would mean they could impersonate any user in the database and spend their credits. As users typically use the same password across multiple websites, this could also be used to hack into other accounts owned by that user.
 
 \subsection{Mitigation}
 
 Instead of storing plaintext passwords in the database, storing a \textbf{salted hash} for each user's password would mean that even if the database was compromised, user's accounts will not be. This is because the salted hash is only used to \textit{check} if a user's password is correct by using a one-way hash function. The additional layer of salt (that should be a randomised string for each user) will ensure that even if 2 user's passwords are the same, they will not have the same hash and also means using password cracking facilities such as rainbow tables are much less feasible due to this additional layer of randomness.
 
-Of course, users' should also use a strong password (which it appears the current users' of the shop do not have) in order to avoid having their password easily brute-forced or dictionary brute-forced. This could be made mandatory when a user signs up for an account.
+Of course, users should also use a strong password (which it appears the current users of the shop do not have) in order to avoid having their password easily brute-forced or dictionary brute-forced. This could be made mandatory when a user signs up for an account, by requiring that passwords are of at least a certain length and use a mixture of letters, numbers and symbols.
 
 \section{Vulnerability}
 
@@ -86,7 +86,7 @@ Source code placed alongside complied code throughout box (by \texttt{user}'s ow
 
 \subsection{Exploit}
 
-Placing source code alongside compiled could allow an attacker to easily reverse engineer any the systems on the box, for example the FileServer. This is because if they gain access to the system, they would also see this source code to see how a given service on the box works (they could even use the FileServer in this case to read these source files). It is then trivial for an attacker to reverse engineer and exploit this service.
+Placing source code alongside compiled could allow an attacker to easily reverse engineer any the systems on the box, for example the FileServer. This is because if they gain access to the system, they would also be able to view the source code to see how a given service on the box works (they could even use the FileServer in this case to read these source files). It is then trivial for an attacker to reverse engineer and exploit this service.
 
 \subsection{Mitigation}
 
