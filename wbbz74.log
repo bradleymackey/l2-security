@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.11.22)  19 NOV 2017 22:39
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.11.22)  21 NOV 2017 19:10
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -290,10 +290,10 @@ Overfull \hbox (31.32843pt too wide) in paragraph at lines 85--86
 
 [3] (./wbbz74.aux) ) 
 Here is how much of TeX's memory you used:
- 2958 strings out of 493014
- 39765 string characters out of 6133350
+ 2959 strings out of 493014
+ 39783 string characters out of 6133350
  107994 words of memory out of 5000000
- 6449 multiletter control sequences out of 15000+600000
+ 6450 multiletter control sequences out of 15000+600000
  13387 words of font info for 49 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  37i,6n,24p,918b,199s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -304,7 +304,7 @@ ts/cm/cmr10.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts
 /cm/cmr12.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/c
 m/cmti10.pfb></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm
 /cmtt10.pfb>
-Output written on wbbz74.pdf (3 pages, 88530 bytes).
+Output written on wbbz74.pdf (3 pages, 88980 bytes).
 PDF statistics:
  38 PDF objects out of 1000 (max. 8388607)
  26 compressed objects within 1 object stream

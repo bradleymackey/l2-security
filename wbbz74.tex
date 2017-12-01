@@ -34,7 +34,7 @@ SQL injection vulnerability on `shop' web server [\texttt{http://localhost:80}].
 
 \subsection{Exploit}
 
-From the `login' page of the shop system, a maliciously crafted username can allow access to other user accounts on the database without a password (e.g. when username is ``\texttt{' OR 1=1 -- }" [\textbf{no password}], the system allows the login, and allows us to view the credits of some user, which in the case of the demo data is \texttt{sally}). This happens because the malicious username modifies the query to return all users in the database (as `\texttt{1=1}' always evaluates to \texttt{true} and `\texttt{-- }' comments out the remainder of the query), then the first row of the query is selected by the PHP script and we can see that user's credits.
+From the `login' page of the shop system, a maliciously crafted username can allow access to other user accounts on the database without a password (e.g. when username is ``\texttt{' OR 1=1 -- }" [\textbf{no password}], the system allows the login, and allows us to view the credits of some user, which in the case of the demo data is \texttt{sally}). This happens because the malicious username modifies the query to return all users in the database (as `\texttt{1=1}' always evaluates to \texttt{true} and `\texttt{-- }' comments out the remainder of the query), then the first row of the query is selected by the PHP script and we can see that first user's credits. We cannot perform other queries though due to the fact that the PHP method \texttt{mysql\_query()} only supports a single query at a time.
 
 \subsection{Mitigation}
 
