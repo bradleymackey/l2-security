@@ -34,7 +34,7 @@ SQL injection vulnerability on `shop' web server [\texttt{http://localhost:80}].
 
 \subsection{Exploit}
 
-From the `login' page of the shop system, a maliciously crafted username can allow access to other user accounts on the database without a password (e.g. when username is ``\texttt{' OR 1=1 -- }" [\textbf{no password}], the system allows the login, and allows us to view the credits of some user, which in the case of the demo data is \texttt{sally}). This happens because the malicious username modifies the query to return all users in the database (as `\texttt{1=1}' always evaluates to \texttt{true} and `\texttt{-- }' comments out the remainder of the query), then the first row of the query is selected by the PHP script and we can see that first user's credits. We cannot perform other queries though due to the fact that the PHP method \texttt{mysql\_query()} only supports a single query at a time.
+From the `login' page of the shop system, a maliciously crafted username can allow access to other user accounts on the database without a password (e.g. when username is ``\texttt{' OR 1=1 -- }" \textbf{providing no password}, the system allows the login, and allows us to view the credits of some user, which in the case of the demo data is \texttt{sally}). This happens because the malicious username modifies the query to return all users in the database (as `\texttt{1=1}' always evaluates to \texttt{true} and `\texttt{-- }' comments out the remainder of the query), then the first row of the query is selected by the PHP script and we can see that first user's credits. We cannot perform other queries though due to the fact that the PHP method \texttt{mysql\_query()} only supports a single query at a time.
 
 \subsection{Mitigation}
 
@@ -100,7 +100,7 @@ When the shop's database is backed up, the entire contents of the database is se
 
 \subsection{Mitigation}
 
-Encrypt the database before transmission and then decrypt on arrival to the backup location, perhaps using the AES-256 encryption standard with a strong password (see vulnerability \#5). This will prevent unauthorised viewing of the contents of the database.
+Encrypt the database before transmission and then decrypt upon arrival to the backup location, perhaps using the AES-256 encryption standard with a strong password (see vulnerability \#5). This will prevent unauthorised viewing of the contents of the database.
 
 \section{Vulnerability}
 
@@ -112,6 +112,6 @@ Placing source code alongside compiled could allow an attacker to easily reverse
 
 \subsection{Mitigation}
 
-Always keep all source code away from production servers, so that the chance of an attacker getting hold of it is nil (at least make reverse engineering \textit{a little} hard for them).
+Always keep all source code away from production servers, so that the chance of an attacker getting hold of it is nil (at least make reverse engineering \textit{a little} hard for them). This can be achieved by only keeping the compiled code on the server and keeping the source code on a memory stick (for example), and then only copying over the compiled code.
 
 \end{document}
