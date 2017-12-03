@@ -38,9 +38,7 @@ From the `login' page of the shop system, a maliciously crafted username can all
 
 \subsection{Mitigation}
 
-Improved input sanitation, by \textbf{escaping} user input, which will prevent user data being interpreted as an SQL query. Stricter input validation could also be applied to the username and password fields, such as only allowing alpha-numeric characters (and maybe \textit{some} symbols).
-
-In addition, the PHP script used to handle login could be modified to ensure that only \textbf{one result is returned}, otherwise display an error. It could also \textbf{double check} that the query result matches the username and password that the user has entered.
+Improved input sanitation, by \textbf{escaping} user input through prepared statements, which will prevent user data being interpreted as an SQL query. Stricter input validation could also be applied to the username and password fields, such as only allowing alpha-numeric characters (and maybe \textit{some} symbols). In addition, the PHP script used to handle login could be modified to ensure that only \textbf{one result is returned}, otherwise display an error. It could also \textbf{double check} that the query's returned username and password matches the username and password that was entered.
 
 \section{Vulnerability}
 
@@ -64,7 +62,19 @@ In order to backup the \texttt{shop} database to the \texttt{backup} account usi
 
 \subsection{Mitigation}
 
-The reason \texttt{user} thinks they require \texttt{root} permission is because in the \texttt{mysqldump} command in \texttt{user/outputDB.c}, they supply the \texttt{root} password as a parameter (\texttt{letmein}), also exposing this unnecessarily. If \texttt{user} tried to run this command without passing the \texttt{root} password in, the command would work without this escalated privilege.
+The reason \texttt{user} thinks they require \texttt{root} permission is because in the \texttt{mysqldump} command in \texttt{user/outputDB.c}, they supply the \texttt{root} password as a parameter (\texttt{-pletmein}), also exposing this unnecessarily. If \texttt{user} tried to run this command without passing the \texttt{root} password in, the command would work without this escalated privilege.
+
+\section{Vulnerability}
+
+\texttt{root} has a very weak password.
+
+\subsection{Exploit}
+
+The \texttt{root} user has a password of `\texttt{letmein}' (discovered in the previous vulnerability) which is an extraordinarily weak password for the user with the most power on the computer, and given access to this account, an attacker could perform almost any function they wished (certainly more than logging into another user would give them).
+
+\subsection{Mitigation}
+
+Change the password for \texttt{root} to be a strong alphanumeric string, at least 9 characters in length, making use of upper and lowercase letters, numbers and symbols.
 
 \section{Vulnerability}
 
@@ -79,6 +89,18 @@ If a malicious user (including a malicious database administrator) gained access
 Instead of storing plaintext passwords in the database, storing a \textbf{salted hash} for each user's password would mean that even if the database was compromised, user's accounts will not be. This is because the salted hash is only used to \textit{check} if a user's password is correct by using a one-way hash function. The additional layer of salt (that should be a randomised string for each user) will ensure that even if 2 user's passwords are the same, they will not have the same hash and also means using password cracking facilities such as rainbow tables are much less feasible due to this additional layer of randomness.
 
 Of course, users should also use a strong password (which it appears the current users of the shop do not have) in order to avoid having their password easily brute-forced or dictionary brute-forced. This could be made mandatory when a user signs up for an account, by requiring that passwords are of at least a certain length and use a mixture of letters, numbers and symbols.
+
+\section{Vulnerability}
+
+The shop SQL database is backed up unencrypted.
+
+\subsection{Exploit}
+
+When the shop's database is backed up, the entire contents of the database is sent unencrypted through a socket to some receiving server (the \texttt{backup} user in this case). While in development this is less of an issue (as the database file is only being sent to and received by \texttt{localhost}). Although, when this is deployed to production an attacker could perform a man-in-the-middle attack to intercept of the database while it is being sent from the server to the backup server. This would give them access to the entire database and all of the (potentially sensitive) data.
+
+\subsection{Mitigation}
+
+Encrypt the database before transmission and then decrypt on arrival to the backup location, perhaps using the AES-256 encryption standard with a strong password (see vulnerability \#5). This will prevent unauthorised viewing of the contents of the database.
 
 \section{Vulnerability}
 
